@@ -6,9 +6,9 @@ import { Alert } from "../components/ui";
 import { parseApiError } from "../lib/apiError";
 
 const STATUSES = [
-  { key: "pending", label: "Pending Expenses" },
-  { key: "approved", label: "Approved Expenses" },
-  { key: "rejected", label: "Rejected Expenses" },
+  { key: "pending", label: "Awaiting review" },
+  { key: "approved", label: "Approved" },
+  { key: "rejected", label: "Rejected" },
 ];
 
 function Dashboard() {
@@ -47,32 +47,41 @@ function Dashboard() {
     };
   }, []);
 
-  return (
-    <div>
-      <h1>Expense Approval System</h1>
+  const isManager = user?.role === "manager";
 
-      <h2>Dashboard{user ? ` — ${user.name} (${user.role})` : ""}</h2>
+  return (
+    <div className="page">
+      <h1>Dashboard</h1>
+      <p className="page-sub">
+        Signed in as <strong>{user?.name}</strong> ({user?.role})
+      </p>
 
       <Alert kind="error">{error}</Alert>
 
       <div className="stats">
         {STATUSES.map(({ key, label }) => (
-          <div className="stat-card" key={key}>
+          <div className={`stat-card ${key}`} key={key}>
             <h3>{label}</h3>
-            <p>{loading ? "…" : counts[key]}</p>
+            {loading ? (
+              <div className="loading-row stat-loading">
+                <span className="spinner" aria-hidden="true" />
+              </div>
+            ) : (
+              <p>{counts[key]}</p>
+            )}
           </div>
         ))}
       </div>
 
-      <div className="row-actions">
-        <Link className="button-link primary" to="/expenses">
+      <div className="quick-actions">
+        <Link className="button-link" to="/expenses">
           View all expenses
         </Link>
         <Link className="button-link" to="/expenses?status=pending">
-          {user?.role === "manager" ? "Review pending expenses" : "My pending expenses"}
+          {isManager ? "Review pending expenses" : "My pending expenses"}
         </Link>
-        {user?.role === "employee" && (
-          <Link className="button-link" to="/create-expense">
+        {!isManager && (
+          <Link className="button-link primary" to="/create-expense">
             Submit an expense
           </Link>
         )}

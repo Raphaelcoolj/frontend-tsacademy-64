@@ -45,7 +45,7 @@ function Expenses() {
 
   const [categoryInput, setCategoryInput] = useState(category);
   // Keep the filter input in sync when the URL category changes
-  // (e.g. clearing filters) — adjusted during render, not in an effect.
+  // (e.g. clearing filters): adjusted during render, not in an effect.
   const [syncedCategory, setSyncedCategory] = useState(category);
   if (category !== syncedCategory) {
     setSyncedCategory(category);
@@ -124,7 +124,7 @@ function Expenses() {
       const parsed = parseApiError(err);
       // 409 = someone else finalized it first → refresh the list (README §14.11).
       const stale = parsed.status === 409 || parsed.status === 404;
-      if (stale) setError(`${parsed.message} — the list has been refreshed.`);
+      if (stale) setError(`${parsed.message}. The list has been refreshed.`);
       else if (!parsed.fields) setError(parsed.message);
       failureFallback?.(parsed);
       if (stale) await load();
@@ -210,12 +210,12 @@ function Expenses() {
   const isBusy = (expense) => busyId === expense._id;
 
   return (
-    <div>
+    <div className="page">
       <h1>My Expenses</h1>
-      <p className="muted" style={{ marginBottom: 16 }}>
+      <p className="page-sub">
         {isManager
-          ? "All expenses — you can approve or reject pending ones."
-          : "Your submitted expenses and their review status."}
+          ? "All expenses in the system. Approve or reject the pending ones."
+          : "Everything you have submitted, from pending to final decision."}
       </p>
 
       <Alert kind="error">{error}</Alert>
@@ -374,138 +374,150 @@ function Expenses() {
       )}
 
       {loading ? (
-        <p className="muted">Loading expenses…</p>
+        <div className="loading-row">
+          <span className="spinner" aria-hidden="true" />
+          Loading expenses…
+        </div>
       ) : expenses.length === 0 ? (
-        <p className="muted">No expenses found.</p>
+        <div className="empty">
+          <strong>No expenses found</strong>
+          {status || category
+            ? "Nothing matches the current filters. Try clearing them."
+            : isManager
+              ? "No expenses have been submitted yet."
+              : "Submit your first expense to get started."}
+        </div>
       ) : (
-        <table className="expenses">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Amount</th>
-              <th>Category</th>
-              <th>Date</th>
-              <th>Status</th>
-              {isManager && <th>Submitted by</th>}
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {expenses.map((expense) => {
-              const pending = expense.status === "pending";
-              const mine = expense.submittedBy?._id ?? expense.submittedBy;
-              const canEdit = !isManager && pending && mine === user?.id;
+        <div className="table-wrap">
+          <table className="expenses">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Amount</th>
+                <th>Category</th>
+                <th>Date</th>
+                <th>Status</th>
+                {isManager && <th>Submitted by</th>}
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {expenses.map((expense) => {
+                const pending = expense.status === "pending";
+                const mine = expense.submittedBy?._id ?? expense.submittedBy;
+                const canEdit = !isManager && pending && mine === user?.id;
 
-              return (
-                <tr key={expense._id}>
-                  <td>
-                    <strong>{expense.title}</strong>
-                    {expense.description && (
-                      <div className="muted">{expense.description}</div>
-                    )}
-                    {expense.receiptDetails && (
-                      <div className="muted">Receipt: {expense.receiptDetails}</div>
-                    )}
-                  </td>
-                  <td className="amount">{expense.amount}</td>
-                  <td>{expense.category}</td>
-                  <td>{(expense.expenseDate ?? "").slice(0, 10)}</td>
-                  <td>
-                    <StatusBadge status={expense.status} />
-                    {expense.status === "rejected" && expense.rejectionReason && (
-                      <div className="rejection">Reason: {expense.rejectionReason}</div>
-                    )}
-                    {expense.reviewedAt && (
-                      <div className="muted">
-                        Reviewed {expense.reviewedAt.slice(0, 10)}
-                        {expense.reviewedBy?.name ? ` by ${expense.reviewedBy.name}` : ""}
-                      </div>
-                    )}
-                  </td>
-                  {isManager && (
+                return (
+                  <tr key={expense._id}>
                     <td>
-                      {expense.submittedBy?.name ?? "—"}
-                      {expense.submittedBy?.email && (
-                        <div className="muted">{expense.submittedBy.email}</div>
+                      <strong>{expense.title}</strong>
+                      {expense.description && (
+                        <div className="muted">{expense.description}</div>
+                      )}
+                      {expense.receiptDetails && (
+                        <div className="muted">Receipt: {expense.receiptDetails}</div>
                       )}
                     </td>
-                  )}
-                  <td>
-                    <div className="row-actions">
-                      {isManager && pending && (
-                        <>
-                          <button
-                            className="btn small primary"
-                            type="button"
-                            disabled={isBusy(expense)}
-                            onClick={() => handleApprove(expense)}
-                          >
-                            {isBusy(expense) ? "Working..." : "Approve"}
-                          </button>
+                    <td className="amount">{expense.amount}</td>
+                    <td>{expense.category}</td>
+                    <td>{(expense.expenseDate ?? "").slice(0, 10)}</td>
+                    <td>
+                      <StatusBadge status={expense.status} />
+                      {expense.status === "rejected" && expense.rejectionReason && (
+                        <div className="rejection">Reason: {expense.rejectionReason}</div>
+                      )}
+                      {expense.reviewedAt && (
+                        <div className="muted">
+                          Reviewed {expense.reviewedAt.slice(0, 10)}
+                          {expense.reviewedBy?.name ? ` by ${expense.reviewedBy.name}` : ""}
+                        </div>
+                      )}
+                    </td>
+                    {isManager && (
+                      <td>
+                        {expense.submittedBy?.name ?? "Unknown"}
+                        {expense.submittedBy?.email && (
+                          <div className="muted">{expense.submittedBy.email}</div>
+                        )}
+                      </td>
+                    )}
+                    <td>
+                      <div className="row-actions">
+                        {isManager && pending && (
+                          <>
+                            <button
+                              className="btn small primary"
+                              type="button"
+                              disabled={isBusy(expense)}
+                              onClick={() => handleApprove(expense)}
+                            >
+                              {isBusy(expense) ? "Working..." : "Approve"}
+                            </button>
+                            <button
+                              className="btn small danger"
+                              type="button"
+                              disabled={isBusy(expense)}
+                              onClick={() => startReject(expense)}
+                            >
+                              Reject
+                            </button>
+                          </>
+                        )}
+
+                        {canEdit && (
+                          <>
+                            <button
+                              className="btn small"
+                              type="button"
+                              onClick={() => startEdit(expense)}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              className="btn small danger"
+                              type="button"
+                              disabled={isBusy(expense)}
+                              onClick={() => handleDelete(expense)}
+                            >
+                              Delete
+                            </button>
+                          </>
+                        )}
+                      </div>
+
+                      {rejectingId === expense._id && (
+                        <div className="reject-box">
+                          <input
+                            type="text"
+                            placeholder="Reason (3-500 characters)"
+                            value={rejectReason}
+                            onChange={(e) => setRejectReason(e.target.value)}
+                          />
                           <button
                             className="btn small danger"
                             type="button"
                             disabled={isBusy(expense)}
-                            onClick={() => startReject(expense)}
+                            onClick={() => handleReject(expense)}
                           >
-                            Reject
+                            Confirm reject
                           </button>
-                        </>
-                      )}
-
-                      {canEdit && (
-                        <>
                           <button
                             className="btn small"
                             type="button"
-                            onClick={() => startEdit(expense)}
+                            onClick={() => setRejectingId(null)}
                           >
-                            Edit
+                            Cancel
                           </button>
-                          <button
-                            className="btn small danger"
-                            type="button"
-                            disabled={isBusy(expense)}
-                            onClick={() => handleDelete(expense)}
-                          >
-                            Delete
-                          </button>
-                        </>
+                          <FieldError fields={rejectFields} name="rejectionReason" />
+                        </div>
                       )}
-                    </div>
-
-                    {rejectingId === expense._id && (
-                      <div className="reject-box">
-                        <input
-                          type="text"
-                          placeholder="Reason (3–500 characters)"
-                          value={rejectReason}
-                          onChange={(e) => setRejectReason(e.target.value)}
-                        />
-                        <button
-                          className="btn small danger"
-                          type="button"
-                          disabled={isBusy(expense)}
-                          onClick={() => handleReject(expense)}
-                        >
-                          Confirm reject
-                        </button>
-                        <button
-                          className="btn small"
-                          type="button"
-                          onClick={() => setRejectingId(null)}
-                        >
-                          Cancel
-                        </button>
-                        <FieldError fields={rejectFields} name="rejectionReason" />
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
 
       <div className="pagination">

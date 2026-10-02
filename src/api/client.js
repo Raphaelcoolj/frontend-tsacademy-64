@@ -22,8 +22,8 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !isCredentialCall) {
       clearSession();
       const path = window.location.pathname;
-      if (path !== "/" && path !== "/login" && path !== "/register") {
-        window.location.assign("/");
+      if (path !== "/login" && path !== "/register") {
+        window.location.assign("/login");
       }
     }
 

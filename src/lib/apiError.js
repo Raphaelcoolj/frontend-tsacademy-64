@@ -1,5 +1,5 @@
 // Turns an axios error into a shape the UI can render directly:
-//   { status, message, fields }  — fields is the backend's { field: message }
+//   { status, message, fields }: fields is the backend's { field: message }
 //   object on 400, otherwise null.
 export function parseApiError(error) {
   const status = error.response?.status;

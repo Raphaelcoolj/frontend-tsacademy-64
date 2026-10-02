@@ -1,7 +1,8 @@
-import { BrowserRouter, Navigate, NavLink, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Link, Navigate, NavLink, Route, Routes } from "react-router-dom";
 
 import { AuthProvider } from "./AuthContext";
 import { useAuth } from "./hooks/useAuth";
+import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
@@ -9,14 +10,17 @@ import CreateExpense from "./pages/CreateExpense";
 import Expenses from "./pages/Expenses";
 
 // Blocks a screen until the session is known, and keeps users on the screens
-// their role allows (the API enforces this too — this is UX only).
+// their role allows (the API enforces this too; this is UX only).
 function RequireAuth({ children, roles }) {
   const { user, initializing } = useAuth();
 
   if (initializing) {
     return (
       <main className="page">
-        <p className="muted">Restoring session…</p>
+        <div className="loading-row">
+          <span className="spinner" aria-hidden="true" />
+          Restoring your session…
+        </div>
       </main>
     );
   }
@@ -30,29 +34,42 @@ function Nav() {
   const { user, initializing, logout } = useAuth();
 
   return (
-    <nav className="app-nav">
-      <h2>Expense Approval System</h2>
+    <header className="app-header">
+      <nav className="app-nav">
+        <Link className="brand" to={user ? "/dashboard" : "/"}>
+          {/* <span className="brand-mark" aria-hidden="true" /> */}
+          Expense Approval
+        </Link>
 
-      <div className="links">
-        {user && <NavLink to="/dashboard">Dashboard</NavLink>}
-        {user?.role === "employee" && <NavLink to="/create-expense">Create Expense</NavLink>}
-        {user && <NavLink to="/expenses">Expenses</NavLink>}
+        <div className="links">
+          {user && (
+            <NavLink to="/" end>
+              Home
+            </NavLink>
+          )}
+          {user && <NavLink to="/dashboard">Dashboard</NavLink>}
+          {user?.role === "employee" && (
+            <NavLink to="/create-expense">New expense</NavLink>
+          )}
+          {user && <NavLink to="/expenses">Expenses</NavLink>}
 
-        {!user && !initializing && <NavLink to="/login">Login</NavLink>}
-        {!user && !initializing && <NavLink to="/register">Register</NavLink>}
+          {!user && !initializing && <NavLink to="/login">Login</NavLink>}
+          {!user && !initializing && <NavLink to="/register">Register</NavLink>}
 
-        {user && (
-          <>
-            <span className="whoami">
-              {user.name} · {user.role}
-            </span>
-            <button className="btn small" type="button" onClick={logout}>
-              Logout
-            </button>
-          </>
-        )}
-      </div>
-    </nav>
+          {user && (
+            <>
+              <span className="whoami">
+                {user.name}
+                <span className="role-tag">{user.role}</span>
+              </span>
+              <button className="btn small" type="button" onClick={logout}>
+                Logout
+              </button>
+            </>
+          )}
+        </div>
+      </nav>
+    </header>
   );
 }
 
@@ -61,10 +78,9 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Nav />
-        <hr />
 
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
