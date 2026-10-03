@@ -134,7 +134,7 @@ function App() {
         </Routes>
 
         <footer className="app-footer">
-          <a href="https://github.com/tsacademy-group-64" target="_blank" rel="noreferrer">
+          <a href="https://github.com/orgs/tsacademy-group-64/repositories" target="_blank" rel="noreferrer">
             GitHub · tsacademy-group-64
           </a>
         </footer>
