@@ -132,6 +132,12 @@ function App() {
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+
+        <footer className="app-footer">
+          <a href="https://github.com/tsacademy-group-64" target="_blank" rel="noreferrer">
+            GitHub · tsacademy-group-64
+          </a>
+        </footer>
       </BrowserRouter>
     </AuthProvider>
   );

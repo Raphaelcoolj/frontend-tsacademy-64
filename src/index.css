@@ -266,6 +266,26 @@ a {
   }
 }
 
+/* ---------- footer ---------- */
+
+.app-footer {
+  margin-top: auto;
+  margin-inline: calc(-1 * var(--gutter));
+  padding: 14px var(--gutter);
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-size: 13.5px;
+}
+
+.app-footer a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.app-footer a:hover {
+  color: var(--brand);
+}
+
 /* ---------- page shell ---------- */
 
 .page {
