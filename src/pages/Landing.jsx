@@ -73,7 +73,7 @@ function Landing() {
           )}
           <a
             className="btn"
-            href="https://github.com/tsacademy-group-64"
+            href="https://github.com/orgs/tsacademy-group-64/repositories"
             target="_blank"
             rel="noreferrer"
           >
