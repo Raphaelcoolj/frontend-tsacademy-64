@@ -1,4 +1,5 @@
-import { BrowserRouter, Link, Navigate, NavLink, Route, Routes } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { BrowserRouter, Link, Navigate, NavLink, Route, Routes, useLocation } from "react-router-dom";
 
 import { AuthProvider } from "./AuthContext";
 import { useAuth } from "./hooks/useAuth";
@@ -32,6 +33,12 @@ function RequireAuth({ children, roles }) {
 
 function Nav() {
   const { user, initializing, logout } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
 
   return (
     <header className="app-header">
@@ -41,7 +48,19 @@ function Nav() {
           Expense Approval
         </Link>
 
-        <div className="links">
+        <button
+          className="menu-btn"
+          type="button"
+          aria-label="Menu"
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((open) => !open)}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
+
+        <div className={menuOpen ? "links open" : "links"}>
           {user && (
             <NavLink to="/" end>
               Home
