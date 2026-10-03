@@ -71,6 +71,14 @@ function Landing() {
               </Link>
             </>
           )}
+          <a
+            className="btn"
+            href="https://github.com/tsacademy-group-64"
+            target="_blank"
+            rel="noreferrer"
+          >
+            View on GitHub
+          </a>
         </div>
       </section>
 
